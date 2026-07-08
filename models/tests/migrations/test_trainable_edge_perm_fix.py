@@ -121,3 +121,17 @@ def test_migration_adds_layout_version_for_zero_trainable_static_graph_provider(
     assert checkpoint["state_dict"]["model.model.encoder_graph_provider.data.trainable_layout_version"].item() == 1
     assert checkpoint["state_dict"]["model.model.processor_graph_provider.trainable_layout_version"].item() == 1
     assert not any(key.endswith("trainable.trainable") for key in checkpoint["state_dict"])
+
+def test_migration_adds_layout_version_for_trainable_keys_at_none() -> None:
+    model = _RootModel(trainable_size=0)
+    checkpoint = {
+        "state_dict": {
+            "model.model.encoder_graph_provider.data.trainable.trainable": None,
+            "model.model.processor_graph_provider.trainable.trainable": None
+        }
+    }
+
+    migrate(checkpoint, model)
+
+    assert checkpoint["state_dict"]["model.model.encoder_graph_provider.data.trainable_layout_version"].item() == 1
+    assert checkpoint["state_dict"]["model.model.processor_graph_provider.trainable_layout_version"].item() == 1
