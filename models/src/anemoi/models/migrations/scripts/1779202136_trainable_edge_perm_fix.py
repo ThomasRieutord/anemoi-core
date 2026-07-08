@@ -1,4 +1,4 @@
-# (C) Copyright 2025-2026 Anemoi contributors.
+# (C) Copyright 2025 Anemoi contributors.
 #
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -70,8 +70,14 @@ def migrate(ckpt: CkptType, model: torch.nn.Module | None = None) -> CkptType:
         else:
             layout_version = int(layout_version)
 
-        if layout_version < graph_provider._TRAINABLE_LAYOUT_VERSION and trainable_key in state_dict:
-            LOGGER.info("Permuting legacy trainable edge parameters for %s", provider_path)
+        if (
+            layout_version < graph_provider._TRAINABLE_LAYOUT_VERSION
+            and trainable_key in state_dict
+            and state_dict[trainable_key] is not None
+        ):
+            LOGGER.info(
+                "Permuting legacy trainable edge parameters for %s", provider_path
+            )
             trainable = state_dict[trainable_key]
             if trainable.shape[0] != graph_provider.perm.shape[0]:
                 msg = (
